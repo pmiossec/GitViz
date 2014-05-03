@@ -50,8 +50,7 @@ namespace GitViz.Logic
                 }
                 else
                 {
-                    _graph = new CommitGraph();
-                    OnPropertyChanged("Graph");
+                    Graph = new CommitGraph();
                     if (_watcher != null)
                     {
                         _watcher.Dispose();
@@ -73,8 +72,7 @@ namespace GitViz.Logic
                 .Where(c => !reachableCommitHashes.Contains(c.Hash))
                 .ToArray();
 
-            _graph = GenerateGraphFromCommits(commits, activeRefName, unreachableCommits);
-            OnPropertyChanged("Graph");
+            Graph = GenerateGraphFromCommits(commits, activeRefName, unreachableCommits);
         }
 
         CommitGraph GenerateGraphFromCommits(IEnumerable<Commit> commits, string activeRefName, IEnumerable<Commit> unreachableCommits)
@@ -139,6 +137,11 @@ namespace GitViz.Logic
         public CommitGraph Graph
         {
             get { return _graph; }
+            set 
+            {
+                _graph = value;
+                OnPropertyChanged("Graph");
+            }
         }
 
         static bool IsValidGitRepository(string path)
