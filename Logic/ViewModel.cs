@@ -28,6 +28,9 @@ namespace GitViz.Logic
             }
         }
 
+        GitCommandExecutor commandExecutor;
+        LogRetriever logRetriever;
+
         public bool IsNewRepository { get; set; }
         public string RepositoryPath
         {
@@ -38,8 +41,8 @@ namespace GitViz.Logic
                 if (IsValidGitRepository(_repositoryPath))
                 {
                     OnPropertyChanged("WindowTitle");
-                    var commandExecutor = new GitCommandExecutor(_repositoryPath);
-                    var logRetriever = new LogRetriever(commandExecutor, _parser);
+                     commandExecutor = new GitCommandExecutor(_repositoryPath);
+                     logRetriever = new LogRetriever(commandExecutor, _parser);
 
                     RefreshGraph(logRetriever);
 
@@ -67,10 +70,14 @@ namespace GitViz.Logic
 
             var reachableCommitHashes = commits.Select(c => c.Hash).ToArray();
             var unreachableHashes = logRetriever.GetRecentUnreachableCommitHashes();
-            var unreachableCommits = logRetriever
+            IEnumerable<Commit> unreachableCommits = null;
+            if (VisualizeUnreachable)
+            {
+                unreachableCommits = logRetriever
                 .GetSpecificCommits(unreachableHashes)
                 .Where(c => !reachableCommitHashes.Contains(c.Hash))
                 .ToArray();
+            }
 
             Graph = GenerateGraphFromCommits(commits, activeRefName, unreachableCommits);
         }
@@ -80,10 +87,18 @@ namespace GitViz.Logic
             commits = commits.ToList();
 
             var graph = new CommitGraph();
-
-            var commitVertices = commits.Select(c => new Vertex(c))
+            List<Vertex> commitVertices;
+            if (unreachableCommits != null)
+            {
+                commitVertices = commits.Select(c => new Vertex(c))
                 .Union(unreachableCommits.Select(c => new Vertex(c) { Orphan = true }))
                 .ToList();
+            }
+            else
+            { 
+            commitVertices = commits.Select(c => new Vertex(c))
+                .ToList();
+            }
 
             // Add all the vertices
             var headVertex = new Vertex(new Reference
@@ -143,6 +158,18 @@ namespace GitViz.Logic
                 OnPropertyChanged("Graph");
             }
         }
+
+        public Boolean VisualizeUnreachable
+        {
+            get { return _visualizeUnreachable; }
+            set
+            {
+                _visualizeUnreachable = value;
+                if (logRetriever != null) RefreshGraph(logRetriever); //TODO: Refactor.
+                OnPropertyChanged("VisualizeUnreachable");
+            }
+        }
+        private Boolean _visualizeUnreachable;
 
         static bool IsValidGitRepository(string path)
         {
