@@ -74,9 +74,9 @@ namespace GitViz.Logic
             if (VisualizeUnreachable)
             {
                 unreachableCommits = logRetriever
-                .GetSpecificCommits(unreachableHashes)
-                .Where(c => !reachableCommitHashes.Contains(c.Hash))
-                .ToArray();
+                    .GetSpecificCommits(unreachableHashes)
+                    .Where(c => !reachableCommitHashes.Contains(c.Hash))
+                    .ToArray();
             }
 
             Graph = GenerateGraphFromCommits(commits, activeRefName, unreachableCommits);
@@ -170,6 +170,18 @@ namespace GitViz.Logic
             }
         }
         private Boolean _visualizeUnreachable;
+
+        public Boolean VisualizeComments
+        {
+            get { return _visualizeComments; }
+            set
+            {
+                _visualizeComments = value;
+                if (logRetriever != null) RefreshGraph(logRetriever); //TODO: Refactor.
+                OnPropertyChanged("VisualizeComments");
+            }
+        }
+        private Boolean _visualizeComments;
 
         static bool IsValidGitRepository(string path)
         {
