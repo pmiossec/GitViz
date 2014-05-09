@@ -32,6 +32,11 @@ namespace GitViz.Logic
         LogRetriever logRetriever;
 
         public bool IsNewRepository { get; set; }
+        public ViewModel()
+        {
+            _numOfCommitsToShow = 20;
+        }
+
         public string RepositoryPath
         {
             get { return _repositoryPath; }
@@ -65,7 +70,7 @@ namespace GitViz.Logic
 
         void RefreshGraph(LogRetriever logRetriever)
         {
-            var commits = logRetriever.GetRecentCommits().ToArray();
+            var commits = logRetriever.GetRecentCommits(NumOfCommitsToShow).ToArray();
             var activeRefName = logRetriever.GetActiveReferenceName();
 
             var reachableCommitHashes = commits.Select(c => c.Hash).ToArray();
@@ -182,6 +187,18 @@ namespace GitViz.Logic
             }
         }
         private Boolean _visualizeComments;
+
+        public Int32 NumOfCommitsToShow
+        {
+            get { return _numOfCommitsToShow; }
+            set
+            {
+                _numOfCommitsToShow = value;
+                if (logRetriever != null) RefreshGraph(logRetriever); //TODO: Refactor.
+                OnPropertyChanged("NumOfCommitsToShow");
+            }
+        }
+        private Int32 _numOfCommitsToShow;
 
         static bool IsValidGitRepository(string path)
         {
