@@ -91,6 +91,10 @@ namespace GitViz.Logic
         {
             commits = commits.ToList();
 
+            int i = 1;
+            AssignFriendlyName(commits, ref i);
+            AssignFriendlyName(unreachableCommits, ref i);
+
             var graph = new CommitGraph();
             List<Vertex> commitVertices;
             if (unreachableCommits != null)
@@ -154,6 +158,17 @@ namespace GitViz.Logic
             return graph;
         }
 
+        private void AssignFriendlyName(IEnumerable<Commit> commits, ref int offset)
+        {
+            if (commits == null)
+                return;
+            foreach (var commit in commits.Reverse())
+            {
+                commit.FriendlyName = "C" + offset;
+                offset++;
+            }
+        }
+
         public CommitGraph Graph
         {
             get { return _graph; }
@@ -187,6 +202,18 @@ namespace GitViz.Logic
             }
         }
         private Boolean _visualizeComments;
+
+        public Boolean FriendlyNaming
+        {
+            get { return _friendlyNaming; }
+            set
+            {
+                _friendlyNaming = value;
+                if (logRetriever != null) RefreshGraph(logRetriever); //TODO: Refactor.
+                OnPropertyChanged("FriendlyNaming");
+            }
+        }
+        private Boolean _friendlyNaming;
 
         public Int32 NumOfCommitsToShow
         {

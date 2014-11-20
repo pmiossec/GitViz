@@ -16,7 +16,12 @@
         <DataTemplate x:Key="CommitTemplate" DataType="{x:Type logic:Vertex}">
             <Border x:Name="Border" BorderBrush="DarkSlateGray" Background="#daf5dd" BorderThickness="3" CornerRadius="10,10,10,10" Padding="10">
                 <StackPanel>
-                    <TextBlock Text="{Binding Path=Commit.ShortHash, Mode=OneWay}" Foreground="Black" FontSize="14pt" FontFamily="Consolas" />
+                    <TextBlock Text="{Binding Path=Commit.ShortHash, Mode=OneWay}"
+                               Visibility="{Binding Path=DataContext.FriendlyNaming, RelativeSource={RelativeSource AncestorType=Window},  Converter={logic:BooleanToVisibilityConverter ConditionForHide=True}}"
+                               Foreground="Black" FontSize="14pt" FontFamily="Consolas" />
+                    <TextBlock Text="{Binding Path=Commit.FriendlyName, Mode=OneWay}"
+                               Visibility="{Binding Path=DataContext.FriendlyNaming, RelativeSource={RelativeSource AncestorType=Window},  Converter={logic:BooleanToVisibilityConverter ConditionForHide=False}}"
+                               Foreground="Black" FontSize="14pt" FontFamily="Consolas" />
                     <TextBlock Text="{Binding Path=Commit.Subject, Mode=OneWay}" 
                                Visibility="{Binding Path=DataContext.VisualizeComments, RelativeSource={RelativeSource AncestorType=Window},  Converter={logic:BooleanToVisibilityConverter}}"
                                Foreground="Black" FontSize="8pt" FontFamily="Consolas" />
@@ -81,12 +86,14 @@
                <CheckBox Margin="0,2,0,0" Content="Show Comments" VerticalAlignment="Center" IsChecked="{Binding VisualizeComments}"/>
             </StackPanel>
 
-            <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" Orientation="Horizontal" Margin="5">
+            <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" Margin="5">
+                <StackPanel Orientation="Horizontal">
                 <Label Content="N° Commits to show" />
                 <TextBox VerticalContentAlignment="Center" Width="30" Text="{Binding NumOfCommitsToShow, UpdateSourceTrigger=PropertyChanged, Delay=500}" MaxLength="3" />
             </StackPanel>
-  
-             </DockPanel>
+                <CheckBox Margin="0,2,0,0" Content="Friendly naming" VerticalAlignment="Center" IsChecked="{Binding FriendlyNaming}"/>
+            </StackPanel>
+        </DockPanel>
         <Image Source="readify.png" Grid.Row="1" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="0.5" Margin="30"></Image>
         <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
             <ui:CommitGraphLayout x:Name="graph"

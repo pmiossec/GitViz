@@ -1,4 +1,4 @@
-﻿namespace GitViz.Logic
+namespace GitViz.Logic
 {
     public class Commit
     {
@@ -17,6 +17,7 @@
             get { return Hash.Substring(0, 7); }
         }
 
+        public string FriendlyName { get; set; }
 
     }
 }
