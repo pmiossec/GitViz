@@ -83,7 +83,7 @@
 
             <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center" Orientation="Horizontal" Margin="5">
                 <Label Content="N° Commits to show" />
-                <TextBox VerticalContentAlignment="Center" Width="30" Text="{Binding NumOfCommitsToShow, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox VerticalContentAlignment="Center" Width="30" Text="{Binding NumOfCommitsToShow, UpdateSourceTrigger=PropertyChanged, Delay=500}" MaxLength="3" />
             </StackPanel>
   
              </DockPanel>
