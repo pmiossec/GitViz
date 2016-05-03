@@ -104,7 +104,7 @@ namespace GitViz.Logic
                 .ToList();
             }
             else
-            { 
+            {
             commitVertices = commits.Select(c => new Vertex(c))
                 .ToList();
             }
@@ -113,6 +113,7 @@ namespace GitViz.Logic
             var headVertex = new Vertex(new Reference
             {
                Name = Reference.HEAD,
+               IsHead = true,
             });
 
             foreach (var commitVertex in commitVertices)
@@ -120,29 +121,25 @@ namespace GitViz.Logic
                 graph.AddVertex(commitVertex);
 
                 if (commitVertex.Commit.Refs == null) continue;
-                var isHeadHere = false;
-                var isHeadSet = false;
                 foreach (var refName in commitVertex.Commit.Refs)
                 {
-                    if (refName == Reference.HEAD)
-                    {
-                        isHeadHere = true;
-                        graph.AddVertex(headVertex);
-                        continue;
-                    }
+                    var name = refName.StartsWith(Reference.HeadCheckouted) ? refName.Substring(8) : refName;
                     var refVertex = new Vertex(new Reference
                     {
-                        Name = refName,
-                        IsActive = refName == activeRefName
+                        Name = name,
+                        IsActive = name == activeRefName,
+                        IsHead = name == Reference.HEAD,
                     });
                     graph.AddVertex(refVertex);
+
+                    if (refVertex.Reference.IsActive)
+                    {
+                        graph.AddVertex(headVertex);
+                        graph.AddEdge(new CommitEdge(headVertex, refVertex));
+                    }
+
                     graph.AddEdge(new CommitEdge(refVertex, commitVertex));
-                    if (!refVertex.Reference.IsActive) continue;
-                    isHeadSet = true;
-                    graph.AddEdge(new CommitEdge(headVertex, refVertex));
                 }
-                if (isHeadHere && !isHeadSet)
-                    graph.AddEdge(new CommitEdge(headVertex, commitVertex));
             }
 
             // Add all the edges
@@ -172,7 +169,7 @@ namespace GitViz.Logic
         public CommitGraph Graph
         {
             get { return _graph; }
-            set 
+            set
             {
                 _graph = value;
                 OnPropertyChanged("Graph");
@@ -235,9 +232,9 @@ namespace GitViz.Logic
                  IsBareGitRepository(path));
         }
 
-        static Boolean IsBareGitRepository(String path) 
+        static Boolean IsBareGitRepository(String path)
         {
-            String configFileForBareRepository = Path.Combine(path, "config"); 
+            String configFileForBareRepository = Path.Combine(path, "config");
             return File.Exists(configFileForBareRepository) &&
                   Regex.IsMatch(File.ReadAllText(configFileForBareRepository), @"bare\s*=\s*true", RegexOptions.IgnoreCase);
         }
